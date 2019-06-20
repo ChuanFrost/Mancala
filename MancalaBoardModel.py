@@ -40,16 +40,15 @@ class MancalaBoardModel:
       
         
         currentHole = self.PreviousPit(HoleNumber - 1 )
-        self.tempboardgame = list(self.boardgame)
+#        On the first move, if the hole is empty, return 0
+        if self.boardgame[self.NextPit(currentHole)] == 0:
+            return 0
         
-        
-      
 #        Loop using number of stone in hand
         while True:
             if self.boardgame[self.NextPit(currentHole)] == 0:
                 score =  self.boardgame[self.NextPit(self.NextPit(currentHole))]
                 self.boardgame[self.NextPit(self.NextPit(currentHole))] = 0
-                print(score)
                 return score
             currentHole = self.NextPit(currentHole)
             stones = self.boardgame[currentHole]

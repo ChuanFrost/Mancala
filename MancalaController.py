@@ -13,6 +13,7 @@ class MancalaController:
         self.board = MancalaBoardModel.MancalaBoardModel()
         self.Current_Player = PlayerModel.PlayerModel("Player 1")
         self.Other_Player = PlayerModel.PlayerModel("Player 2")
+        self.Waiting_Player = 0;
         self.player_score = [0,0]
         self.score = 0
         
@@ -55,15 +56,17 @@ class MancalaController:
         return scoreTuple
         
     def SwitchPlayer(self):
-        #switch player
+#        switch player
         if self.Current_Player.PlayerName() == "Player 1":
-            self.Current_Player.PlayerName() == "Player 2"
+            print("p1 to p2")
+            self.Waiting_Player = self.Current_Player
+            self.Current_Player = self.Other_Player
         else:
-            self.Current_Player.PlayerName() == "Player 1"
+            self.Current_Player = self.Waiting_Player
+            print("p2 to p1")
         
-        return self.Current_Player.PlayerName()
-    
-    
+
+
     def ReturnPlayerTurn(self,):
         return self.Current_Player.PlayerName()
     
@@ -73,13 +76,13 @@ class MancalaController:
              score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
              print(score)
              self.player_score[0] = self.player_score[0] + score
-             print("This is store:")
+             print("[1]This is store:")
              print(self.player_score[0])
-        elif self.Current_Player.PlayerName() == "Player 2":
+        else:
              score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
              print(score)
-             score = self.player_score[1]
-             print("This is store:")
+             self.player_score[1] += score
+             print("[2]This is store:")
              print(self.player_score[1])
         self.Current_Player.SetScore(score)
     
