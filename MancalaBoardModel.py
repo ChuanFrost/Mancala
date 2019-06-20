@@ -131,10 +131,11 @@ class MancalaBoardModel:
       
         
         currentHole = self.PreviousPit(HoleNumber - 1 )
-        self.tempboardgame = list(self.boardgame)
+#        Check if hole selected is empty
+        if(self.boardgame[self.NextPit(currentHole)] == 0):
+            return 0
+
         
-        
-      
 #        Loop using number of stone in hand
         while True:
             if self.boardgame[self.NextPit(currentHole)] == 0:
