@@ -273,9 +273,9 @@ def ReturnImageForScore(score):
 def ReturnScoreImages(scores):
     player1 = ReturnImageForScore(scores[0])
     player2 = ReturnImageForScore(scores[1])
-    scores=(player1, player2)
-    return scores
     
+    return [player1,player2]
+
 def ReturnStoreImage(value):
     if value == 0:
         return se 
@@ -383,11 +383,11 @@ def UpdateScreen():
             screen.blit(currentPlayerImage, (355,40))
             
             scores = game.ReturnTotalScore()
-            scores = ReturnScoreImages(scores)
+            scoresImg = ReturnScoreImages(scores)
             
             #images scores
-            screen.blit(scores[0], (664,130)) 
-            screen.blit(scores[1], (28,130)) 
+            screen.blit(scoresImg[0], (664,130)) 
+            screen.blit(scoresImg[1], (28,130)) 
             
             #----------------------------------------------------
             # Stones on the board
@@ -435,7 +435,7 @@ def UpdateScreen():
 ##################################################
 ## the game loop for mancala
 #################################################
-currentPlayerImage = player1 # player 1 goes first  
+global currentPlayerImage # player 1 goes first  
 
 
 
@@ -443,6 +443,7 @@ def game_loop():
    
     global helpflag
     global running
+    global currentPlayerImage
     while running:
             
             for event in pygame.event.get():

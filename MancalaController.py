@@ -44,47 +44,33 @@ class MancalaController:
 
     
     def ReturnTotalScore(self):
-        player1 = 0
-        player2 = 0
-        
-        if self.Current_Player.PlayerName() == "Player 1":
-            player1 = self.player_score[0]
-        else:
-            player2 = self.player_score[1]
-            
-        scoreTuple = (player1,player2)
-        return scoreTuple
+        return self.player_score;
         
     def SwitchPlayer(self):
 #        switch player
         if self.Current_Player.PlayerName() == "Player 1":
-            print("p1 to p2")
             self.Waiting_Player = self.Current_Player
             self.Current_Player = self.Other_Player
         else:
             self.Current_Player = self.Waiting_Player
-            print("p2 to p1")
+
         
 
 
     def ReturnPlayerTurn(self,):
         return self.Current_Player.PlayerName()
     
+    
     def PlayerSelectsHole(self, hole):    
         # Updates Players Score
         if self.Current_Player.PlayerName() == "Player 1":
              score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
-             print(score)
-             self.player_score[0] = self.player_score[0] + score
-             print("[1]This is store:")
-             print(self.player_score[0])
+             self.player_score[0] += score
         else:
              score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
-             print(score)
              self.player_score[1] += score
-             print("[2]This is store:")
-             print(self.player_score[1])
-        self.Current_Player.SetScore(score)
+
+#        self.Current_Player.SetScore(score)
     
     
     def EndofGameLogic(self):
