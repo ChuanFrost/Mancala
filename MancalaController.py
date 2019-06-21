@@ -2,89 +2,96 @@
 #email: perezjbryan@gmail.com
 # This file contains the mancala game logic
 
-import MancalaBoardModel, PlayerModel
+import MancalaBoardModel, PlayerModel, BotModel
 
 
 
 
 class MancalaController:
 
-    def __init__(self):
+    def __init__(self, difficulty=None):
         self.board = MancalaBoardModel.MancalaBoardModel()
         self.Current_Player = PlayerModel.PlayerModel("Player 1")
         self.Other_Player = PlayerModel.PlayerModel("Player 2")
+        self.Bot = BotModel.BotModel("Bot", difficulty)
+        self.difficulty = difficulty
+        self.Waiting_Player = 0;
+        self.player_score = [0,0]
+        self.score = 0
+        self.isContinue = True
+        
+        
+    def Difficulty(self):
+        return self.difficulty;
     
-
-    
-
     def ContinueGame(self):
-        return self.board.HasStonesLeft(self.Other_Player.PlayerName())
+        return self.isContinue;
         
 
     def ReturnHoleValue(self, hole):
-        self.board.printb()
+#        self.board.printb()
         return self.board.ReturnHoleValue(hole)
         
     def ReturnStoresValue(self):
         return self.board.ReturnStores()
         
-    def ReturnPlayerScores(self):
-        player1 =0 
-        player2 =0
+
+    def ReturnTotalScore(self):
+        return self.player_score;
         
+    def SwitchPlayer(self):
+#        switch player
         if self.Current_Player.PlayerName() == "Player 1":
-            player1 = self.Current_Player.Score()
-            print ("player 1: ", self.Current_Player.Score())
-        elif self.Other_Player.PlayerName() == "Player 1":
-            player1 = self.Other_Player.Score()
-            print ("player 1: ", self.Other_Player.Score())
+            self.Waiting_Player = self.Current_Player
+            self.Current_Player = self.Other_Player
+        else:
+            self.Current_Player = self.Waiting_Player
+
+    def SwitchPlayer2(self):
+#        switch player
+        if self.Current_Player.PlayerName() == "Player 1":
+            self.Waiting_Player = self.Current_Player
+            self.Current_Player = self.Bot
+        elif self.Current_Player.PlayerName() == "Bot":
+            self.Current_Player = self.Waiting_Player
             
-        if self.Current_Player.PlayerName() == "Player 2":
-            player2 = self.Current_Player.Score()
-            print ("player2: ", self.Current_Player.Score())
-        elif self.Other_Player.PlayerName() == "Player 2":
-            player2 = self.Other_Player.Score()
-            print ("player 2: ", self.Other_Player.Score())
-            
-        scoreTuple =(player1, player2)
-        return scoreTuple
-        
     def ReturnPlayerTurn(self,):
         return self.Current_Player.PlayerName()
     
+    
     def PlayerSelectsHole(self, hole):    
         # Updates Players Score
-        Store = self.board.ReturnStores()
         if self.Current_Player.PlayerName() == "Player 1":
-             score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
-             score = Store[0]
+             score = self.board.MoveSelected(hole)
+             self.player_score[0] += score
+             print(f"Player 1 selected hole {hole} and scored {score}.\n")
+             if self.player_score[0] >= 29:
+                 self.isContinue = False
         elif self.Current_Player.PlayerName() == "Player 2":
-             score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
-             score = Store[1]
-        self.Current_Player.SetScore(score)
-    
+             score = self.board.MoveSelected(self.board.BoardSize() - hole)
+             print(f"Player 2 selected hole {self.board.BoardSize() - hole} and scored {score}.\n")
+             self.player_score[1] += score
+             if self.player_score[1] >= 29:
+                 self.isContinue = False
+        else:
+             move = self.Current_Player.GetMove(self.board.Boardgame())
+             score = self.board.MoveSelected(move)
+             print(f"Bot selected hole {move} and scored {score}.\nBoard State after bot move: {self.board.Boardgame()}\n")
+             self.player_score[1] += score
+             if self.player_score[1] >= 29:
+                 self.isContinue = False            
+                 
+        if not self.board.ToContinue(self.Current_Player.PlayerName()):
+            self.isContinue = False
     
     def EndofGameLogic(self):
-        # Moves Other_Players remaining stones to his store
-        self.board.RowToStore(self.Other_Player.PlayerName())
-        # Update other players score
-        Store = self.board.ReturnStores()
-        if self.Other_Player.PlayerName() == "Player 1":
-            Score = self.Current_Player.Score()
-            Score = Store[0]
-        elif self.Other_Player.PlayerName() == "Player 2":
-            Score = self.Current_Player.Score()
-            Score = Store[1]
-        self.Other_Player.SetScore(Score)
-    
-    def DetermineWinner(self):
-        # Player with most stones wins
-        if self.Other_Player.Score() == self.Current_Player.Score():
-            return "tie"
-        elif self.Other_Player.Score() > self.Current_Player.Score():
-            return self.Other_Player.PlayerName()
+        if self.player_score[0] > self.player_score[1]:
+            return "Player 1"
+        elif self.player_score[1] > self.player_score[0]:
+            return "Player 2"
         else:
-            return self.Current_Player.PlayerName()
+            return "Tie"
+
     
 
 '''

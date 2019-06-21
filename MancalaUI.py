@@ -2,7 +2,7 @@
 #email: perezjbryan@gmail.com
 # This file contains the main game loop for the mancala game and functions for the UI
 
-import pygame, sys, os, MancalaController# ,MyRNG
+import pygame, sys, os, MancalaController,BotModel# ,MyRNG
 from pygame import K_1,K_2, K_3, K_4,K_5,K_6,K_7,K_8,K_9,K_0,K_MINUS,K_EQUALS,K_h,K_q,K_w,K_e,K_r,K_t,K_y,K_u
 
 ##########################################
@@ -14,12 +14,17 @@ width = 745
 height = 430
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Mancala!')
-running = 1
 #rand = MyRNG.MyRNG() 
 LEFT = 1
 bgcolor = ( 0, 0, 0)
+white = (255,255,255)
+gray = (50,50,50)
+global game
 game = MancalaController.MancalaController()
 helpflag = False
+running = 1
+
+
 
 ##############################################
 
@@ -269,9 +274,9 @@ def ReturnImageForScore(score):
 def ReturnScoreImages(scores):
     player1 = ReturnImageForScore(scores[0])
     player2 = ReturnImageForScore(scores[1])
-    scores=(player1, player2)
-    return scores
     
+    return [player1,player2]
+
 def ReturnStoreImage(value):
     if value == 0:
         return se 
@@ -288,6 +293,52 @@ def ReturnStoreImage(value):
     elif value > 5:
         return sm
 
+def text_objects(text, font):
+    textSurface = font.render(text, True, white)
+    return textSurface, textSurface.get_rect()
+
+
+def button(msg,x,y,w,h,ic,ac,action=None,a=None):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+   
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        pygame.draw.rect(screen, ac,(x,y,w,h))
+
+        if click[0] == 1 and action != None:
+            action()         
+    else:
+        pygame.draw.rect(screen, ic,(x,y,w,h))
+
+    smallText = pygame.font.SysFont("comicsansms",20)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ( (x+(w/2)), (y+(h/2)) )
+    screen.blit(textSurf, textRect)
+    
+def main_menu():
+    
+    intro = True
+    
+    
+    while intro:
+        for event in pygame.event.get():
+            print(event)
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+                
+        screen.fill(bgcolor)
+        largeText = pygame.font.Font('freesansbold.ttf',50)
+        TextSurf, TextRect = text_objects("Welcome to Mancala", largeText)
+        TextRect.center = ((width/2),(height/2))
+        screen.blit(TextSurf, TextRect)
+        
+        #last parameter to run function
+        button("Normal Mode",90,300,170,50,bgcolor,gray,game_loop)
+        button("V.S BOT EASY",280,300,170,50,bgcolor,gray,game_loop2)
+        button("V.S BOT HARD", 500,300,170,50,bgcolor,gray,game_loop3)
+        pygame.display.update()
+        clock.tick(15)
 
 
 def UpdateScreen():
@@ -334,12 +385,13 @@ def UpdateScreen():
             screen.blit(mancala, (80,40))
             screen.blit(currentPlayerImage, (355,40))
             
-            scores = game.ReturnPlayerScores()
-            scores = ReturnScoreImages(scores)
+            scores = game.ReturnTotalScore()
+            scoresImg = ReturnScoreImages(scores)
             
             #images scores
-            screen.blit(scores[0], (664,130)) 
-            screen.blit(scores[1], (28,130)) 
+            screen.blit(scoresImg[0], (664,130)) 
+            screen.blit(scoresImg[1], (28,130))
+            button("Reset",40,300,170,50,bgcolor,gray,reset)
             
             #----------------------------------------------------
             # Stones on the board
@@ -376,123 +428,275 @@ def UpdateScreen():
             screen.blit(hole6, (512,177)) #569x234
             screen.blit(hole7, (569,177)) #626x234
             
-        
-            
-            #----------------------------------------------------
-            # Help board, player scores, Mancala images
-            if helpflag:
-                screen.blit(boardhelp, (100,265))
-                
-            screen.blit(mancala, (80,40))
-            screen.blit(currentPlayerImage, (355,40))
-            
-            scores = game.ReturnPlayerScores()
-            scores = ReturnScoreImages(scores)
-            
-            #images scores
-            screen.blit(scores[0], (664,130)) 
-            screen.blit(scores[1], (28,130)) 
-            
-            #----------------------------------------------------
-            # Stones on the board
-            
-            #store
-            stores = game.ReturnStoresValue()
-        
             #----------------------------------------------------
             
             #updates the screen with the new data
             pygame.display.flip()
             
 #####################################################################            
-            
+  
+         
 
 ##################################################
 ## the game loop for mancala
 #################################################
-currentPlayerImage = player1 # player 1 goes first
-while running:
+
+def reset():
+    global game
+    if game.Difficulty() == None:
+        game = MancalaController.MancalaController()
+    elif game.Difficulty == 0:
+        game = MancalaController.MancalaController(0)
+    else:
+        game = MancalaController.MancalaController(1)
+
+
+def game_loop():
+   
+    global helpflag
+    global running
+    global currentPlayerImage
+    global game
+    game = MancalaController.MancalaController()
+    while running:
             
-    for event in pygame.event.get():
-        if game.ReturnPlayerTurn() == "Player 1":
-            currentPlayerImage = player1
-        else:
-            currentPlayerImage = player2
+            for event in pygame.event.get():
+                
+                if  game.ReturnPlayerTurn() == "Player 1":
+                    currentPlayerImage = player1
+                else:
+                    currentPlayerImage = player2
         
-        if event.type == pygame.QUIT:
-                running = 0
+                if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
         
-        if game.ContinueGame():
-            
-            if event.type == pygame.KEYDOWN:
-                if event.key == K_1:
-                    value = 1
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_2:    
-                    value = 2
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_3:    
-                    value = 3
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_4:
-                    value = 4
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_5:
-                    value = 5
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_6:    
-                    value = 6
-                    game.PlayerSelectsHole(value)
-                if  event.key ==  K_7:
-                    value = 7
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_q:    
-                    value = 14
-                    game.PlayerSelectsHole(value)
-                if  event.key == K_w:
-                    value = 13
-                    game.PlayerSelectsHole(value)
-                if  event.key ==  K_e:
-                    value = 12
-                    game.PlayerSelectsHole(value)
-                if  event.key ==  K_r:
-                    value = 11
-                    game.PlayerSelectsHole(value)
-                if  event.key ==  K_t:    
-                    value = 10
-                    game.PlayerSelectsHole(value)
-                if  event.key ==  K_y:    
-                    value = 9
-                    game.PlayerSelectsHole(value)
-                if event.key ==  K_u:    
-                    value = 8
-                    game.PlayerSelectsHole(value)
-                if event.key == K_h:
-                    if helpflag == True:
-                        helpflag =False
-                    else:
-                        helpflag = True
+                if game.ContinueGame():
+                    
+                        
+                    if event.type == pygame.KEYDOWN:
+                    
+                        if event.key == K_1:
+                            value = 1
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_2:    
+                            value = 2
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_3:    
+                            value = 3
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_4:
+                            value = 4
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_5:
+                            value = 5
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_6:    
+                            value = 6
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key ==  K_7:
+                            value = 7
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer()
+                        if  event.key == K_h:
+                            if helpflag == True:
+                                helpflag =False
+                            else:
+                                helpflag = True
                     
                 
-            screen.fill(bgcolor)
+                    screen.fill(bgcolor)
         
                 
-            UpdateScreen()
+                    UpdateScreen()
         
-        else: 
-            game.EndofGameLogic()
-            UpdateScreen()
-            winner = game.DetermineWinner()
-            if winner == "Player 1":
-                screen.blit(player1wins, (355,40))
-            elif winner == "Player 2":
-                screen.blit(player2wins, (355,40))
-            elif winner == "tie":
-                screen.blit(tie, (355,40))
+                else: 
+                        winner = game.EndofGameLogic()
+                        if  winner == "Player 1":
+                            currentPlayerImage = player1wins
+                        elif winner == "Player 2":
+                            currentPlayerImage = player2wins
+                        elif winner == "Tie":
+                            currentPlayerImage = tie
+                            
+                            
+                        UpdateScreen()
                 
-            pygame.display.flip()
+                        pygame.display.flip()
     
 
+
+def game_loop2():
+    global helpflag
+    global running
+    global currentPlayerImage
+    global game
+    game = MancalaController.MancalaController(0)
+    while running:
+    
+            for event in pygame.event.get():
+                
+                if  game.ReturnPlayerTurn() == "Player 1":
+                    currentPlayerImage = player1
+                else:
+                    currentPlayerImage = player2
+        
+                if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
+
+        
+                if game.ContinueGame():
+                
+                    if event.type == pygame.KEYDOWN:
+                    
+                        if event.key == K_1:
+                            value = 1
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_2:    
+                            value = 2
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_3:    
+                            value = 3
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_4:
+                            value = 4
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_5:
+                            value = 5
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_6:    
+                            value = 6
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key ==  K_7:
+                            value = 7
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  game.ReturnPlayerTurn() == "Bot":
+                            value = 14
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_h:
+                            if helpflag == True:
+                                helpflag =False
+                            else:
+                                helpflag = True
+                    
+                
+                    screen.fill(bgcolor)
+                
+                    UpdateScreen()
+        
+                else: 
+                        winner = game.EndofGameLogic()
+                        if  winner == "Player 1":
+                            currentPlayerImage = player1wins
+                        elif winner == "Player 2":
+                            currentPlayerImage = player2wins
+                        elif winner == "Tie":
+                            currentPlayerImage = tie
+                            
+                            
+                        UpdateScreen()
+                
+                        pygame.display.flip()
+    
+
+def game_loop3():
+    global helpflag
+    global running
+    global currentPlayerImage
+    global game
+    game = MancalaController.MancalaController(1)
+    while running:
+    
+            for event in pygame.event.get():
+                
+                if  game.ReturnPlayerTurn() == "Player 1":
+                    currentPlayerImage = player1
+                else:
+                    currentPlayerImage = player2
+        
+                if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
+
+        
+                if game.ContinueGame():
+                
+                    if event.type == pygame.KEYDOWN:
+                    
+                        if event.key == K_1:
+                            value = 1
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_2:    
+                            value = 2
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_3:    
+                            value = 3
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_4:
+                            value = 4
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_5:
+                            value = 5
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_6:    
+                            value = 6
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key ==  K_7:
+                            value = 7
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  game.ReturnPlayerTurn() == "Bot":
+                            value = 14
+                            game.PlayerSelectsHole(value)
+                            game.SwitchPlayer2()
+                        if  event.key == K_h:
+                            if helpflag == True:
+                                helpflag =False
+                            else:
+                                helpflag = True
+                    
+                
+                    screen.fill(bgcolor)
+                
+                    UpdateScreen()
+        
+                else: 
+                        winner = game.EndofGameLogic()
+                        if  winner == "Player 1":
+                            currentPlayerImage = player1wins
+                        elif winner == "Player 2":
+                            currentPlayerImage = player2wins
+                        elif winner == "Tie":
+                            currentPlayerImage = tie
+                            
+                            
+                        UpdateScreen()
+                
+                        pygame.display.flip()
+    
+    
+main_menu()
 
 
 
