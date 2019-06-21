@@ -2,17 +2,18 @@
 #email: perezjbryan@gmail.com
 # This file contains the mancala game logic
 
-import MancalaBoardModel, PlayerModel
+import MancalaBoardModel, PlayerModel, BotModel
 
 
 
 
 class MancalaController:
 
-    def __init__(self):
+    def __init__(self, difficulty=None):
         self.board = MancalaBoardModel.MancalaBoardModel()
         self.Current_Player = PlayerModel.PlayerModel("Player 1")
         self.Other_Player = PlayerModel.PlayerModel("Player 2")
+        self.Bot = BotModel.BotModel("Bot", difficulty)
         self.Waiting_Player = 0;
         self.player_score = [0,0]
         self.score = 0
@@ -43,6 +44,14 @@ class MancalaController:
         else:
             self.Current_Player = self.Waiting_Player
 
+    def SwitchPlayer2(self):
+#        switch player
+        if self.Current_Player.PlayerName() == "Player 1":
+            self.Waiting_Player = self.Current_Player
+            self.Current_Player = self.Bot
+        elif self.Current_Player.PlayerName() == "Bot":
+            self.Current_Player = self.Waiting_Player
+            
     def ReturnPlayerTurn(self,):
         return self.Current_Player.PlayerName()
     
@@ -52,13 +61,22 @@ class MancalaController:
         if self.Current_Player.PlayerName() == "Player 1":
              score = self.board.MoveSelected(hole)
              self.player_score[0] += score
+             print(f"Player 1 selected hole {hole} and scored {score}.\n")
              if self.player_score[0] >= 29:
                  self.isContinue = False
-        else:
+        elif self.Current_Player.PlayerName() == "Player 2":
              score = self.board.MoveSelected(self.board.BoardSize() - hole)
+             print(f"Player 2 selected hole {self.board.BoardSize() - hole} and scored {score}.\n")
              self.player_score[1] += score
              if self.player_score[1] >= 29:
                  self.isContinue = False
+        else:
+             move = self.Current_Player.GetMove(self.board.Boardgame())
+             score = self.board.MoveSelected(move)
+             print(f"Bot selected hole {move} and scored {score}.\nBoard State after bot move: {self.board.Boardgame()}\n")
+             self.player_score[1] += score
+             if self.player_score[1] >= 29:
+                 self.isContinue = False            
                  
         if not self.board.ToContinue(self.Current_Player.PlayerName()):
             self.isContinue = False
@@ -70,16 +88,7 @@ class MancalaController:
             return "Player 2"
         else:
             return "Tie"
-    
-#    
-#    def DetermineWinner(self):
-#        # Player with most stones wins
-#        if self.Other_Player.Score() == self.Current_Player.Score():
-#            return "tie"
-#        elif self.Other_Player.Score() > self.Current_Player.Score():
-#            return self.Other_Player.PlayerName()
-#        else:
-#            return self.Current_Player.PlayerName()
+
     
 
 '''

@@ -1,7 +1,7 @@
 #Bryan Perez
 #email: perezjbryan@gmail.com
 # This file contains Mancala Board and functions for using it
-import array
+
 class MancalaBoardModel:
     
     # constructor:
@@ -9,9 +9,9 @@ class MancalaBoardModel:
     #
     #
     #                        player1                    player2
-    def __init__(self, boardsize = 14): #[ 0, 1, 2, 3, 4, 5 ,6    7, 8, 9, 10, 11, 12, 13]
-        self.boardgame =array.array('i', (4 for i in range(boardsize)))
-    
+    def __init__(self): #[ 0, 1, 2, 3, 4, 5 ,6    7, 8, 9, 10, 11, 12, 13]
+        self.boardgame = [ 4, 4, 4, 4, 4, 4, 4,      4, 4, 4, 4,  4,  4, 4]
+
     #Function Boardgame(self)
     #Returns the board game array
     def Boardgame(self):
@@ -29,7 +29,7 @@ class MancalaBoardModel:
             return self.boardgame[hole-1]
         
               
-#
+#   Get score for move selected
     def MoveSelected(self, HoleNumber):
       
         currentHole = self.PreviousPit(HoleNumber - 1 )
@@ -55,33 +55,27 @@ class MancalaBoardModel:
                 self.boardgame[currentHole] += 1
                 stones -= 1 
                 
-
+        
+#    Move one hole forward
     def NextPit(self, hole):
         if hole == (len(self.boardgame)- 1):
             return 0
         
         return (hole + 1) 
       
+#    Move one hole back
     def PreviousPit(self, hole):
         if hole == 0:
             return (len(self.boardgame)- 1)
         
         return (hole-1)
         
-    
-#    def moveCheck(self, Player, HoleNumber):
-#        if Player == "Player 1" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
-#            return True
-#        elif Player == "Player 2" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
-#            return True
-#        else:
-#            return False
-        
-    
+#    Get occupied cells from either player 1 holes or p2 holes
     def GetOccupiedCells(self, start, end):
         return [i for i, x in enumerate(self.boardgame[start:end]) if x != 0];
     
     
+#    Decide continuity of game
     def ToContinue(self, playerName):
         if(playerName == "Player 1"):
             if self.GetOccupiedCells(0,7):

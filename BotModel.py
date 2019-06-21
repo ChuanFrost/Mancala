@@ -7,13 +7,14 @@ class BotModel:
     
     # constructor:
     # initializes player's Name, score, last stone postions variables
-    def __init__(self, playerName):
+    def __init__(self, playerName, diff=None):
         self.playerName = playerName
-        self.score = 0
-        self.Last_stone_position = 0
-        self.maxDepth = 1
         self.boardSize = 14
-        self.halfSize = 0
+        if(diff == 1):
+            self.maxDepth = 7
+        else:
+            self.maxDepth = 3
+            
     
     #Function: playerName(self)
     #returns player name
@@ -30,16 +31,15 @@ class BotModel:
     def SetScore(self, score):
         self.score = score
 
-    def SetBoardSize(self, boardSize):
-        self.boardSize = boardSize
-        self.halfSize = int(boardSize/2)
         
+#    Move to next Hole
     def NextPit(self, hole):
         if hole == (self.boardSize - 1):
             return 0
         
         return (hole + 1) 
       
+#    Move back one hole
     def PreviousPit(self, hole):
         if hole == 0:
             return (self.boardSize - 1)
@@ -47,9 +47,14 @@ class BotModel:
         return (hole-1)   
     
 #    Find index for occupied hole
-    def GetOccupiedCells(self, board):
-        return [i for i, x in enumerate(board[7:14]) if x != 0];
+    def GetMaxOccupiedCells(self, board):
+        list = [i for i, x in enumerate(board[7:14]) if x != 0];
+        return [x + 7 for x in list]
     
+    def GetMinOccupiedCells(self, board):
+        return [i for i, x in enumerate(board[0:7]) if x != 0];
+    
+#    Get score for move selected 
     def EvaluateMove(self, hole, board):
         
         currentHole = self.PreviousPit(hole)
@@ -72,10 +77,10 @@ class BotModel:
                 copyBoard[currentHole] += 1
                 stones -= 1 
 
-    
+#    Called from controller to return best move using minimax + ab pruning
     def GetMove(self, board):
         
-        occupiedCells = self.GetOccupiedCells(board)
+        occupiedCells = self.GetMaxOccupiedCells(board)
         if not occupiedCells:
            return 7
       
@@ -90,12 +95,14 @@ class BotModel:
             maxEval = max(maxEval, evalValue)
             bestMove = move if evalValue == maxEval else bestMove;
         
-        return bestMove + 7
+        return bestMove
         
     
+#    Evaluate leaf node and move
     def HeuristicFunction(self, maxPlayerScore, minPlayerScore):
         return (maxPlayerScore - minPlayerScore)
     
+#    Perform minimax and ad pruning
     def iterative_minimax(self, move, maxPlayerScore, minPlayerScore, board, depth, alpha, beta, isMaximizingPlayer):
         if depth == 1:
             bestMove = -1
@@ -103,11 +110,12 @@ class BotModel:
         if depth == self.maxDepth:
             return move, self.HeuristicFunction(maxPlayerScore, minPlayerScore)
         
-        occupiedCells = self.GetOccupiedCells(board);
-        if not occupiedCells:
-           return move, self.HeuristicFunction(maxPlayerScore, minPlayerScore)
+
         if isMaximizingPlayer: 
             maxEval = float('-inf');
+            occupiedCells = self.GetMaxOccupiedCells(board);
+            if not occupiedCells:
+               return move, self.HeuristicFunction(maxPlayerScore, minPlayerScore)
             for i in occupiedCells:
                 
 
@@ -123,11 +131,14 @@ class BotModel:
         
         else:
             minEval = float('inf')
+            occupiedCells = self.GetMinOccupiedCells(board);
+            if not occupiedCells:
+               return move, self.HeuristicFunction(maxPlayerScore, minPlayerScore)
             for i in occupiedCells:
 
                 newBoard, score = self.EvaluateMove(i, board)
                 
-                move, evalValue = self.iterative_minimax(move, maxPlayerScore, minPlayerScore - score, newBoard, depth + 1, alpha, beta, True);
+                move, evalValue = self.iterative_minimax(move, maxPlayerScore, minPlayerScore + score, newBoard, depth + 1, alpha, beta, True);
                 minEval = min(minEval, evalValue);
                 bestMove = move if evalValue == minEval else bestMove;
                 beta = min(beta, evalValue)
@@ -136,17 +147,7 @@ class BotModel:
             return bestMove, minEval     
 
 
-#board1 = [2,1,7,7,7,0,7,0,0,6,1,6,6,0]   
-#board2 = [6,5,1,2,12,1,12,0,0,0,3,0,3,1]
-#board3 = [0,2,1,7,7,7,0,7,0,0,6,1,6,6]  
-#
-#p = BotModel("dumb")
-#print(p.GetMove(board3))
-#print(p.EvaluateMove(6,board1))
 
-#print(p.GetOccupiedCells(board1))
-#if not p.GetOccupiedCells(board1):
-#    print("yes")
 
 
             
