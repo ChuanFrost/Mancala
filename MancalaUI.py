@@ -457,7 +457,8 @@ def game_loop():
                                 running = 0
         
                 if game.ContinueGame():
-                
+                    
+                        
                     if event.type == pygame.KEYDOWN:
                     
                         if event.key == K_1:
@@ -488,33 +489,34 @@ def game_loop():
                             value = 7
                             game.PlayerSelectsHole(value)
                             game.SwitchPlayer()
-                        if  event.key == K_q:    
-                            value = 14
-                            game.PlayerSelectsHole(value)
-                        if  event.key == K_w:
-                            value = 13
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
-                        if  event.key ==  K_e:
-                            value = 12
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
-                        if  event.key ==  K_r:
-                            value = 11
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
-                        if  event.key ==  K_t:    
-                            value = 10
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
-                        if  event.key ==  K_y:    
-                            value = 9
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
-                        if  event.key ==  K_u:    
-                            value = 8
-                            game.PlayerSelectsHole(value)
-                            game.SwitchPlayer()
+#                        if  event.key == K_q:    
+#                            value = 14
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key == K_w:
+#                            value = 13
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key ==  K_e:
+#                            value = 12
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key ==  K_r:
+#                            value = 11
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key ==  K_t:    
+#                            value = 10
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key ==  K_y:    
+#                            value = 9
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
+#                        if  event.key ==  K_u:    
+#                            value = 8
+#                            game.PlayerSelectsHole(value)
+#                            game.SwitchPlayer()
                         if  event.key == K_h:
                             if helpflag == True:
                                 helpflag =False
@@ -528,17 +530,18 @@ def game_loop():
                     UpdateScreen()
         
                 else: 
-                        game.EndofGameLogic()
-                        UpdateScreen()
-                        winner = game.DetermineWinner()
+                        winner = game.EndofGameLogic()
                         if  winner == "Player 1":
-                            screen.blit(player1wins, (355,40))
+                            currentPlayerImage = player1wins
                         elif winner == "Player 2":
-                            screen.blit(player2wins, (355,40))
-                        elif winner == "tie":
-                            screen.blit(tie, (355,40))
+                            currentPlayerImage = player2wins
+                        elif winner == "Tie":
+                            currentPlayerImage = tie
+                            
+                            
+                        UpdateScreen()
                 
-                            pygame.display.flip()
+                        pygame.display.flip()
     
 
 

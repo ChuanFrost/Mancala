@@ -13,7 +13,6 @@ class BotModel:
         self.Last_stone_position = 0
         self.maxDepth = 1
         self.boardSize = 14
-#        self.halfSize = int(self.boardSize/2)
         self.halfSize = 0
     
     #Function: playerName(self)
@@ -91,7 +90,7 @@ class BotModel:
             maxEval = max(maxEval, evalValue)
             bestMove = move if evalValue == maxEval else bestMove;
         
-        return bestMove+7
+        return bestMove + 7
         
     
     def HeuristicFunction(self, maxPlayerScore, minPlayerScore):

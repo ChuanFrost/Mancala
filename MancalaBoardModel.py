@@ -2,7 +2,6 @@
 #email: perezjbryan@gmail.com
 # This file contains Mancala Board and functions for using it
 import array
-import time
 class MancalaBoardModel:
     
     # constructor:
@@ -11,14 +10,15 @@ class MancalaBoardModel:
     #
     #                        player1                    player2
     def __init__(self, boardsize = 14): #[ 0, 1, 2, 3, 4, 5 ,6    7, 8, 9, 10, 11, 12, 13]
-#        self.boardgame = [ 4, 4, 4, 4, 4, 4, 4,      4, 4, 4, 4,  4,  4, 4]
         self.boardgame =array.array('i', (4 for i in range(boardsize)))
-        self.tempboardgame = [ 4, 4, 4, 4, 4, 4, 4 ,      4, 4, 4,  4,  4,  4, 4]
     
     #Function Boardgame(self)
     #Returns the board game array
     def Boardgame(self):
         return self.boardgame
+    
+    def BoardSize(self):
+        return (len(self.boardgame) + 1)
         
     #Function ReturnHoleValue(self, hole)
     #returns value of specific hole
@@ -28,17 +28,10 @@ class MancalaBoardModel:
         if hole >6:
             return self.boardgame[hole-1]
         
-    
-    #Function Last_stone_position(self)
-    # return the last stone position
-    def Last_stone_position(self):
-        
-        return self.Last_stone_position
               
-##
-    def MoveSelected(self, HoleNumber, playerName, continueMove = False):
+#
+    def MoveSelected(self, HoleNumber):
       
-        
         currentHole = self.PreviousPit(HoleNumber - 1 )
 #        On the first move, if the hole is empty, return 0
         if self.boardgame[self.NextPit(currentHole)] == 0:
@@ -46,6 +39,7 @@ class MancalaBoardModel:
         
 #        Loop using number of stone in hand
         while True:
+#            Check if next hole is empty
             if self.boardgame[self.NextPit(currentHole)] == 0:
                 score =  self.boardgame[self.NextPit(self.NextPit(currentHole))]
                 self.boardgame[self.NextPit(self.NextPit(currentHole))] = 0
@@ -61,11 +55,6 @@ class MancalaBoardModel:
                 self.boardgame[currentHole] += 1
                 stones -= 1 
                 
-    #            Check if next hole is empty
-
-            
-                    
-    
 
     def NextPit(self, hole):
         if hole == (len(self.boardgame)- 1):
@@ -80,40 +69,33 @@ class MancalaBoardModel:
         return (hole-1)
         
     
-    def moveCheck(self, Player, HoleNumber):
-        if Player == "Player 1" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
-            return True
-        elif Player == "Player 2" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
-            return True
+#    def moveCheck(self, Player, HoleNumber):
+#        if Player == "Player 1" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
+#            return True
+#        elif Player == "Player 2" and HoleNumber in range (1,7) and self.boardgame[HoleNumber] != 0:
+#            return True
+#        else:
+#            return False
+        
+    
+    def GetOccupiedCells(self, start, end):
+        return [i for i, x in enumerate(self.boardgame[start:end]) if x != 0];
+    
+    
+    def ToContinue(self, playerName):
+        if(playerName == "Player 1"):
+            if self.GetOccupiedCells(0,7):
+                return True
+            else:
+                return False
         else:
-            return False
-    
-    
-    # Function HasStonesLeft(self, Player)
-    # Takes in players name checks to see if player has any stones left in his row            
-    def HasStonesLeft(self, Player):
-        StonesLeft = False;
-        total = 0
+            if self.GetOccupiedCells(7,14):
+                return True
+            else:
+                return False
+            
         
-        if Player == "Player 1":
-            x=0 
-            while x < 7:
-                total = total + self.boardgame[x]
-                x=x+1
-                
-            if total > 0:
-                StonesLeft = True
-        
-        if Player == "Player 2":
-            x=7 
-            while x < 14:
-                total = total + self.boardgame[x]
-                x=x+1
-                
-            if total > 0:
-                StonesLeft = True
-                
-        return StonesLeft
+
     
    
 

@@ -16,22 +16,12 @@ class MancalaController:
         self.Waiting_Player = 0;
         self.player_score = [0,0]
         self.score = 0
+        self.isContinue = True
         
         
-    def UpdateScore(self,score):
-        
-        if self.player_score[self.Current_Player.PlayerName == "Player 1"]:
-            x = 0
-        else:
-            x = 1
-            
-        self.player_score[x] = self.player_score[x] + score
-          
-
-    
 
     def ContinueGame(self):
-        return self.board.HasStonesLeft(self.Other_Player.PlayerName())
+        return self.isContinue;
         
 
     def ReturnHoleValue(self, hole):
@@ -42,7 +32,6 @@ class MancalaController:
         return self.board.ReturnStores()
         
 
-    
     def ReturnTotalScore(self):
         return self.player_score;
         
@@ -54,9 +43,6 @@ class MancalaController:
         else:
             self.Current_Player = self.Waiting_Player
 
-        
-
-
     def ReturnPlayerTurn(self,):
         return self.Current_Player.PlayerName()
     
@@ -64,34 +50,36 @@ class MancalaController:
     def PlayerSelectsHole(self, hole):    
         # Updates Players Score
         if self.Current_Player.PlayerName() == "Player 1":
-             score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
+             score = self.board.MoveSelected(hole)
              self.player_score[0] += score
+             if self.player_score[0] >= 29:
+                 self.isContinue = False
         else:
-             score = self.board.MoveSelected(hole, self.Current_Player.PlayerName())
+             score = self.board.MoveSelected(self.board.BoardSize() - hole)
              self.player_score[1] += score
-
-#        self.Current_Player.SetScore(score)
-    
+             if self.player_score[1] >= 29:
+                 self.isContinue = False
+                 
+        if not self.board.ToContinue(self.Current_Player.PlayerName()):
+            self.isContinue = False
     
     def EndofGameLogic(self):
-        # Update other players score
-        Store = self.board.ReturnStores()
-        if self.Other_Player.PlayerName() == "Player 1":
-            Score = self.Current_Player.Score()
-            Score = Store[0]
-        elif self.Other_Player.PlayerName() == "Player 2":
-            Score = self.Current_Player.Score()
-            Score = Store[1]
-        self.Other_Player.SetScore(Score)
-    
-    def DetermineWinner(self):
-        # Player with most stones wins
-        if self.Other_Player.Score() == self.Current_Player.Score():
-            return "tie"
-        elif self.Other_Player.Score() > self.Current_Player.Score():
-            return self.Other_Player.PlayerName()
+        if self.player_score[0] > self.player_score[1]:
+            return "Player 1"
+        elif self.player_score[1] > self.player_score[0]:
+            return "Player 2"
         else:
-            return self.Current_Player.PlayerName()
+            return "Tie"
+    
+#    
+#    def DetermineWinner(self):
+#        # Player with most stones wins
+#        if self.Other_Player.Score() == self.Current_Player.Score():
+#            return "tie"
+#        elif self.Other_Player.Score() > self.Current_Player.Score():
+#            return self.Other_Player.PlayerName()
+#        else:
+#            return self.Current_Player.PlayerName()
     
 
 '''
