@@ -391,7 +391,7 @@ def UpdateScreen():
             #images scores
             screen.blit(scoresImg[0], (664,130)) 
             screen.blit(scoresImg[1], (28,130))
-            button("Reset",40,300,170,50,bgcolor,gray,main_menu)
+            button("Reset",40,300,170,50,bgcolor,gray,reset)
             
             #----------------------------------------------------
             # Stones on the board
@@ -441,6 +441,14 @@ def UpdateScreen():
 ## the game loop for mancala
 #################################################
 
+def reset():
+    global game
+    if game.Difficulty() == None:
+        game = MancalaController.MancalaController()
+    elif game.Difficulty == 0:
+        game = MancalaController.MancalaController(0)
+    else:
+        game = MancalaController.MancalaController(1)
 
 
 def game_loop():

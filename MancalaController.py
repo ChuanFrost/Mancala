@@ -14,13 +14,16 @@ class MancalaController:
         self.Current_Player = PlayerModel.PlayerModel("Player 1")
         self.Other_Player = PlayerModel.PlayerModel("Player 2")
         self.Bot = BotModel.BotModel("Bot", difficulty)
+        self.difficulty = difficulty
         self.Waiting_Player = 0;
         self.player_score = [0,0]
         self.score = 0
         self.isContinue = True
         
         
-
+    def Difficulty(self):
+        return self.difficulty;
+    
     def ContinueGame(self):
         return self.isContinue;
         
